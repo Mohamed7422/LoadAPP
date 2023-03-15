@@ -17,8 +17,6 @@ class LoadingButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-
-
     private var widthSize = 0
     private var heightSize = 0
 
@@ -49,9 +47,10 @@ class LoadingButton @JvmOverloads constructor(
 
         override fun onAnimationEnd(animation: Animator?) {
             super.onAnimationEnd(animation)
+
+            valueAnimator.cancel()
+            valueAnimatorcircle.cancel()
             progress = 0.0
-            buttonState = ButtonState.Completed
-            invalidate()
         }
     }
 
@@ -59,9 +58,9 @@ class LoadingButton @JvmOverloads constructor(
     fun hasCompletedDownload() {
         // cancel the animation when file is downloaded
         buttonState = ButtonState.Completed
+        progressAnimatorEnd()
         custom_button.isEnabled = true
-        valueAnimator.cancel()
-        valueAnimatorcircle.cancel()
+
         invalidate()
         requestLayout()
 
@@ -70,6 +69,7 @@ class LoadingButton @JvmOverloads constructor(
     init {
         //this enable the custom view to be clickable
         isClickable = true
+
 
         valueAnimator = AnimatorInflater.loadAnimator(context, R.animator.loading_animation)
                 as ValueAnimator
@@ -97,7 +97,7 @@ class LoadingButton @JvmOverloads constructor(
 
         if (buttonState == ButtonState.Completed)
             buttonState = ButtonState.Loading
-         custom_button.isEnabled = false
+            custom_button.isEnabled = false
         valueAnimator.start()
         valueAnimatorcircle.start()
 
@@ -122,7 +122,6 @@ class LoadingButton @JvmOverloads constructor(
     }
 
     private val oval = RectF()
-
 
     private fun setSpace() {
         val horizontalCenter = (width.div(1.36)).toFloat()

@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         if (completed) {
-            loadingButton.hasCompletedDownload()
+
         }
 
     }
@@ -93,8 +93,8 @@ class MainActivity : AppCompatActivity() {
 
                         notificationManager.sendNotification(applicationContext.getString(R.string.notification_description)
                             ,applicationContext,"Success")
-
-                        completed = true
+                        loadingButton.hasCompletedDownload()
+//                        completed = true
 
                     }else
                     {
