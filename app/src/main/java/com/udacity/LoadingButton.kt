@@ -9,6 +9,7 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import kotlinx.android.synthetic.main.content_main.view.*
 import kotlin.properties.Delegates
 
 
@@ -30,10 +31,11 @@ class LoadingButton @JvmOverloads constructor(
     private var valueAnimatorcircle = ValueAnimator()
 
 
-
-
     // observes the state of button
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new -> }
+    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
+
+
+    }
 
     //update every time we move from 0 to 100 (loading progress)
     private fun animatorListener(it: ValueAnimator) {
@@ -49,7 +51,6 @@ class LoadingButton @JvmOverloads constructor(
             super.onAnimationEnd(animation)
             progress = 0.0
             buttonState = ButtonState.Completed
-
             invalidate()
         }
     }
@@ -58,6 +59,7 @@ class LoadingButton @JvmOverloads constructor(
     fun hasCompletedDownload() {
         // cancel the animation when file is downloaded
         buttonState = ButtonState.Completed
+        custom_button.isEnabled = true
         valueAnimator.cancel()
         valueAnimatorcircle.cancel()
         invalidate()
@@ -73,17 +75,21 @@ class LoadingButton @JvmOverloads constructor(
                 as ValueAnimator
         valueAnimator.addUpdateListener { animatorListener(it) }
         //when end of animator happened ,we remove the loading
-        valueAnimator.addListener(progressAnimatorEnd())
-
-        valueAnimatorcircle = ValueAnimator.ofInt(0, 100).apply {
-            duration = 2000
-            repeatCount = ValueAnimator.INFINITE
+//        valueAnimator.addListener(progressAnimatorEnd())
+          valueAnimatorcircle = ValueAnimator.ofInt(0, 100).apply {
 
             addUpdateListener { valueAnimator ->
                 progress = (valueAnimator.animatedValue as Int).toDouble()
                 invalidate()
             }
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            duration = 2000
+            invalidate()
+
         }
+
+
     }
 
     override fun performClick(): Boolean {
@@ -91,7 +97,7 @@ class LoadingButton @JvmOverloads constructor(
 
         if (buttonState == ButtonState.Completed)
             buttonState = ButtonState.Loading
-
+         custom_button.isEnabled = false
         valueAnimator.start()
         valueAnimatorcircle.start()
 

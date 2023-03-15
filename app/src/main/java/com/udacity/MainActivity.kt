@@ -9,11 +9,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Toast
@@ -21,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_detail.*
 import kotlinx.android.synthetic.main.content_main.*
 
 
@@ -55,23 +52,21 @@ class MainActivity : AppCompatActivity() {
                     .show()
             } else {
                 checkedBtn()
-                completed = true
 
-                notificationManager = ContextCompat.getSystemService(applicationContext,
-                    NotificationManager::class.java
-                ) as NotificationManager
-                notificationManager.sendNotification(applicationContext.getString(R.string.notification_description)
-                    ,applicationContext)
             }
-        }
-        if (completed) {
-            loadingButton.hasCompletedDownload()
+
         }
 
+        notificationManager = ContextCompat.getSystemService(applicationContext, NotificationManager::class.java) as NotificationManager
         createChannel(
             getString(R.string.download_channel_ID),
             getString(R.string.download_channel_name)
         )
+
+        if (completed) {
+            loadingButton.hasCompletedDownload()
+        }
+
     }
 
 
@@ -88,23 +83,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-            if (id == downloadID ){
-                if(getDownloadStatus() == DownloadManager.STATUS_SUCCESSFUL){
-                    Toast.makeText(this@MainActivity,"Dounload Done", Toast.LENGTH_SHORT).show()
+        override fun onReceive(context: Context?, intent: Intent) {
+            val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            val action = intent.action
+            if(action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+            {
+                if (id == downloadID ){
+                    if(getDownloadStatus() == DownloadManager.STATUS_SUCCESSFUL){
 
+                        notificationManager.sendNotification(applicationContext.getString(R.string.notification_description)
+                            ,applicationContext,"Success")
 
-                }else
-                {
-                    Toast.makeText(this@MainActivity,"Dounload not Done", Toast.LENGTH_SHORT).show()
+                        completed = true
 
+                    }else
+                    {
+
+                        notificationManager.sendNotification(applicationContext.getString(R.string.notification_description)
+                            ,applicationContext,"Fail")
+
+                    }
                 }
             }
+
+
         }
     }
 
     private fun download(url:String,title:String) {
+
+
         val request =
             DownloadManager.Request(Uri.parse(url))
                 .setTitle(title)
@@ -117,6 +125,8 @@ class MainActivity : AppCompatActivity() {
         //a unique long ID which acts as an identifier for the download.
         downloadID =
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+
+
 
     }
 
@@ -153,12 +163,17 @@ class MainActivity : AppCompatActivity() {
     // Notification ID.
     private val NOTIFICATION_ID = 0
     @SuppressLint("WrongConstant")
-    fun NotificationManager.sendNotification(messageBody: String, applicationContext: Context){
+    fun NotificationManager.sendNotification(
+        messageBody: String,
+        applicationContext: Context,
+        status: String
+    ){
         // Create the content intent for the notification, which launches
         // this activity
 
         val statue_intent = Intent(applicationContext,DetailActivity::class.java)
         statue_intent.putExtra("downloadID",downloadID)
+        statue_intent.putExtra("status",status)
 
         // TODO 1: Pending intent
         val statuePendingIntent = PendingIntent.getActivity(

@@ -41,36 +41,14 @@ class DetailActivity : AppCompatActivity() {
             return DownloadManager.ERROR_UNKNOWN.toString()
 
         }
-        fun getDownloadStatus() : Int {
-            val query = DownloadManager.Query()
-            query.setFilterById(downloadID)
-            val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-            val cursor = downloadManager.query(query)
-            if (cursor.moveToFirst()) {
-                val columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                val status  =cursor.getInt(columnIndex)
-                return status
-            }
-            return DownloadManager.ERROR_UNKNOWN
-        }
+
+        val status = intent.getStringExtra("status")
 
 
         filetext.text = getDownloadTitle()
+        statusState.text = status
 
 
-        when (getDownloadStatus()) {
-            DownloadManager.STATUS_SUCCESSFUL -> {
-                statusState.text = getString(R.string.Succes)
-                statusState.setTextColor(baseContext.getColor(R.color.green))
-
-            }
-            DownloadManager.STATUS_FAILED -> {
-                statusState.text = getString(R.string.Fail)
-                statusState.setTextColor(baseContext.getColor(R.color.red))
-
-            }
-
-        }
 
         button.setOnClickListener{
             val intent = Intent(this,MainActivity::class.java)
